@@ -31,5 +31,6 @@ class UserRead(BaseModel):
     is_active: bool
     is_available: bool
     max_open_leads: int
+    email_verified_at: datetime | None
     created_at: datetime
     updated_at: datetime

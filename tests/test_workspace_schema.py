@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.workspace import WorkspaceCreate
+from app.schemas.workspace import WorkspaceCreate, WorkspaceRead
 
 
 def test_workspace_create_uses_default_configuration() -> None:
@@ -37,3 +37,7 @@ def test_workspace_configuration_rejects_invalid_retention_period() -> None:
                 "configuration": {"operational": {"lead_data_retention_days": 0}},
             }
         )
+
+
+def test_workspace_read_includes_onboarding_completion_state() -> None:
+    assert "onboarding_completed_at" in WorkspaceRead.model_fields

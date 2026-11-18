@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 from typing import Any
@@ -19,16 +18,17 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class JobType(str, enum.Enum):
+class JobType(LowercaseEnum):
     PROCESS_INTAKE = "process_intake"
     QUALIFY_LEAD = "qualify_lead"
     GENERATE_REPLY = "generate_reply"
     SYNC_CRM = "sync_crm"
 
 
-class JobStatus(str, enum.Enum):
+class JobStatus(LowercaseEnum):
     QUEUED = "queued"
     RUNNING = "running"
     SUCCEEDED = "succeeded"
@@ -71,9 +71,11 @@ class BackgroundJob(Base):
         nullable=True,
         index=True,
     )
-    job_type: Mapped[JobType] = mapped_column(Enum(JobType, name="job_type"), nullable=False)
+    job_type: Mapped[JobType] = mapped_column(
+        Enum(JobType, name="job_type", values_callable=enum_values), nullable=False
+    )
     status: Mapped[JobStatus] = mapped_column(
-        Enum(JobStatus, name="job_status"),
+        Enum(JobStatus, name="job_status", values_callable=enum_values),
         nullable=False,
         default=JobStatus.QUEUED,
         server_default=text("'queued'"),

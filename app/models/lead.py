@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 from typing import Any
@@ -8,9 +7,10 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class LeadStatus(str, enum.Enum):
+class LeadStatus(LowercaseEnum):
     """The sales-work state of an enquiry that passed intake validation."""
 
     NEW = "new"
@@ -20,7 +20,7 @@ class LeadStatus(str, enum.Enum):
     CLOSED_LOST = "closed_lost"
 
 
-class QualificationStatus(str, enum.Enum):
+class QualificationStatus(LowercaseEnum):
     """The outcome of Leadflow's deterministic rules and AI-assisted review."""
 
     PENDING = "pending"
@@ -30,7 +30,7 @@ class QualificationStatus(str, enum.Enum):
     NOT_A_FIT = "not_a_fit"
 
 
-class CrmSyncStatus(str, enum.Enum):
+class CrmSyncStatus(LowercaseEnum):
     """A compact current state for the lead's eventual CRM sync."""
 
     NOT_REQUIRED = "not_required"
@@ -83,20 +83,20 @@ class Lead(Base):
         server_default=text("'{}'::jsonb"),
     )
     lead_status: Mapped[LeadStatus] = mapped_column(
-        Enum(LeadStatus, name="lead_status"),
+        Enum(LeadStatus, name="lead_status", values_callable=enum_values),
         nullable=False,
         default=LeadStatus.NEW,
         server_default=text("'new'"),
     )
     qualification_status: Mapped[QualificationStatus] = mapped_column(
-        Enum(QualificationStatus, name="qualification_status"),
+        Enum(QualificationStatus, name="qualification_status", values_callable=enum_values),
         nullable=False,
         default=QualificationStatus.PENDING,
         server_default=text("'pending'"),
     )
     qualification_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     crm_sync_status: Mapped[CrmSyncStatus] = mapped_column(
-        Enum(CrmSyncStatus, name="crm_sync_status"),
+        Enum(CrmSyncStatus, name="crm_sync_status", values_callable=enum_values),
         nullable=False,
         default=CrmSyncStatus.NOT_REQUIRED,
         server_default=text("'not_required'"),

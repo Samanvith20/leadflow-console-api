@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 
@@ -7,9 +6,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class ReplyDraftStatus(str, enum.Enum):
+class ReplyDraftStatus(LowercaseEnum):
     DRAFT = "draft"
     APPROVED = "approved"
     DISCARDED = "discarded"
@@ -46,7 +46,7 @@ class ReplyDraft(Base):
     subject: Mapped[str | None] = mapped_column(String(250), nullable=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[ReplyDraftStatus] = mapped_column(
-        Enum(ReplyDraftStatus, name="reply_draft_status"),
+        Enum(ReplyDraftStatus, name="reply_draft_status", values_callable=enum_values),
         nullable=False,
         default=ReplyDraftStatus.DRAFT,
         server_default=text("'draft'"),

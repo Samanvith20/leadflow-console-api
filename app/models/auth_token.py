@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 
@@ -7,9 +6,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class AuthTokenPurpose(str, enum.Enum):
+class AuthTokenPurpose(LowercaseEnum):
     PASSWORD_RESET = "password_reset"
     EMAIL_VERIFICATION = "email_verification"
 
@@ -31,11 +31,12 @@ class AuthToken(Base):
         index=True,
     )
     purpose: Mapped[AuthTokenPurpose] = mapped_column(
-        Enum(AuthTokenPurpose, name="auth_token_purpose"), nullable=False
+        Enum(AuthTokenPurpose, name="auth_token_purpose", values_callable=enum_values), nullable=False
     )
     token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    invalidated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

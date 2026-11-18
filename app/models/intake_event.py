@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 from typing import Any
@@ -18,9 +17,10 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class IntakeEventStatus(str, enum.Enum):
+class IntakeEventStatus(LowercaseEnum):
     PENDING = "pending"
     QUARANTINED = "quarantined"
     PROCESSED = "processed"
@@ -54,7 +54,7 @@ class IntakeEvent(Base):
     raw_payload_ciphertext: Mapped[str | None] = mapped_column(Text, nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[IntakeEventStatus] = mapped_column(
-        Enum(IntakeEventStatus, name="intake_event_status"),
+        Enum(IntakeEventStatus, name="intake_event_status", values_callable=enum_values),
         nullable=False,
         default=IntakeEventStatus.PENDING,
         server_default=text("'pending'"),

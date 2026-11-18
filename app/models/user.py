@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 
@@ -17,9 +16,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class UserRole(str, enum.Enum):
+class UserRole(LowercaseEnum):
     MANAGER = "manager"
     USER = "user"
 
@@ -43,7 +43,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role"),
+        Enum(UserRole, name="user_role", values_callable=enum_values),
         nullable=False,
         default=UserRole.USER,
         server_default=text("'user'"),
@@ -57,6 +57,7 @@ class User(Base):
     max_open_leads: Mapped[int] = mapped_column(
         Integer, nullable=False, default=10, server_default=text("10")
     )
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

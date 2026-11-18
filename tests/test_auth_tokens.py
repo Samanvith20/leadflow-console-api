@@ -1,3 +1,4 @@
+from app.models.auth_token import AuthToken
 from app.services.auth_tokens import create_auth_token, hash_auth_token
 
 
@@ -11,3 +12,7 @@ def test_auth_token_is_high_entropy_and_only_its_hash_is_persistable() -> None:
 
 def test_different_auth_tokens_have_different_hashes() -> None:
     assert hash_auth_token(create_auth_token()) != hash_auth_token(create_auth_token())
+
+
+def test_auth_token_has_a_distinct_invalidation_timestamp() -> None:
+    assert "invalidated_at" in AuthToken.__table__.c

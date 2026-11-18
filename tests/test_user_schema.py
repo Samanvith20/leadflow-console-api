@@ -25,3 +25,9 @@ def test_user_create_rejects_invalid_capacity() -> None:
             password="a-long-enough-password",
             max_open_leads=-1,
         )
+
+
+def test_user_read_includes_email_verification_state() -> None:
+    from app.schemas.user import UserRead
+
+    assert "email_verified_at" in UserRead.model_fields

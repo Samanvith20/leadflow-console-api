@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 from typing import Any
@@ -8,9 +7,10 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class SourceType(str, enum.Enum):
+class SourceType(LowercaseEnum):
     WEBSITE_FORM = "website_form"
     META = "meta"
     GENERIC_WEBHOOK = "generic_webhook"
@@ -20,7 +20,7 @@ class SourceType(str, enum.Enum):
     WHATSAPP = "whatsapp"
 
 
-class SourceStatus(str, enum.Enum):
+class SourceStatus(LowercaseEnum):
     ACTIVE = "active"
     PAUSED = "paused"
 
@@ -40,12 +40,12 @@ class Source(Base):
     )
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     source_type: Mapped[SourceType] = mapped_column(
-        Enum(SourceType, name="source_type"), nullable=False
+        Enum(SourceType, name="source_type", values_callable=enum_values), nullable=False
     )
     public_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     webhook_secret_ciphertext: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[SourceStatus] = mapped_column(
-        Enum(SourceStatus, name="source_status"),
+        Enum(SourceStatus, name="source_status", values_callable=enum_values),
         nullable=False,
         default=SourceStatus.ACTIVE,
         server_default=text("'active'"),

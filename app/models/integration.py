@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime
 from typing import Any
@@ -18,13 +17,14 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
+from app.models.enums import LowercaseEnum, enum_values
 
 
-class IntegrationProvider(str, enum.Enum):
+class IntegrationProvider(LowercaseEnum):
     HUBSPOT = "hubspot"
 
 
-class IntegrationStatus(str, enum.Enum):
+class IntegrationStatus(LowercaseEnum):
     CONNECTED = "connected"
     DISABLED = "disabled"
     ERROR = "error"
@@ -49,7 +49,7 @@ class Integration(Base):
         index=True,
     )
     provider: Mapped[IntegrationProvider] = mapped_column(
-        Enum(IntegrationProvider, name="integration_provider"), nullable=False
+        Enum(IntegrationProvider, name="integration_provider", values_callable=enum_values), nullable=False
     )
     external_account_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
     credentials_ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
@@ -60,7 +60,7 @@ class Integration(Base):
         server_default=text("'{}'::jsonb"),
     )
     status: Mapped[IntegrationStatus] = mapped_column(
-        Enum(IntegrationStatus, name="integration_status"),
+        Enum(IntegrationStatus, name="integration_status", values_callable=enum_values),
         nullable=False,
         default=IntegrationStatus.CONNECTED,
         server_default=text("'connected'"),
