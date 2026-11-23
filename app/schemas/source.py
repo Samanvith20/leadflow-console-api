@@ -15,7 +15,14 @@ class SourceFieldDefinition(BaseModel):
     label: str = Field(min_length=1, max_length=100)
     field_type: Literal["string", "email", "phone", "number", "boolean", "date", "url", "enum"]
     required: bool = False
-    maps_to: Literal["contact.full_name", "contact.email", "contact.phone_e164", "contact.company_name", "lead.enquiry_message", "lead.custom_fields"]
+    maps_to: Literal[
+        "contact.full_name",
+        "contact.email",
+        "contact.phone_e164",
+        "contact.company_name",
+        "lead.enquiry_message",
+        "lead.custom_fields",
+    ]
     options: list[str] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode="after")
@@ -38,13 +45,35 @@ class SourceConfiguration(BaseModel):
     def validate_unique_keys(self) -> "SourceConfiguration":
         if len({field.key for field in self.field_definitions}) != len(self.field_definitions):
             raise ValueError("Field keys must be unique")
+        standard_destinations = [
+            field.maps_to
+            for field in self.field_definitions
+            if field.maps_to != "lead.custom_fields"
+        ]
+        if len(standard_destinations) != len(set(standard_destinations)):
+            raise ValueError("Map each standard Leadflow field only once")
         return self
+
+
+def validate_website_form_configuration(configuration: SourceConfiguration) -> None:
+    """Require enough data to create a useful website-form lead."""
+    destinations = {field.maps_to for field in configuration.field_definitions}
+    if not {"contact.email", "contact.phone_e164"}.intersection(destinations):
+        raise ValueError("Website forms need an Email or Phone field")
+    if "lead.enquiry_message" not in destinations:
+        raise ValueError("Website forms need a Requirement or Message field")
 
 
 class SourceCreate(BaseModel):
     name: str = Field(min_length=1, max_length=150)
     source_type: SourceType
     configuration: SourceConfiguration = Field(default_factory=SourceConfiguration)
+
+    @model_validator(mode="after")
+    def validate_website_form_fields(self) -> "SourceCreate":
+        if self.source_type == SourceType.WEBSITE_FORM:
+            validate_website_form_configuration(self.configuration)
+        return self
 
 
 class SourceUpdate(BaseModel):
@@ -55,8 +84,15 @@ class SourceUpdate(BaseModel):
 
 class SourceRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: UUID; workspace_id: UUID; name: str; source_type: SourceType; public_id: str; status: SourceStatus
-    configuration: dict; created_at: datetime; updated_at: datetime
+    id: UUID
+    workspace_id: UUID
+    name: str
+    source_type: SourceType
+    public_id: str
+    status: SourceStatus
+    configuration: dict
+    created_at: datetime
+    updated_at: datetime
 
 
 class SourceCreated(SourceRead):

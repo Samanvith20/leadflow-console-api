@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from app.models.user import User, UserRole
 from app.models.workspace import Workspace
 from app.schemas.workspace import (
+    AiGuidanceConfiguration,
     OrganizationConfiguration,
+    QualificationConfiguration,
     WorkspaceProfileRead,
     WorkspaceProfileUpdate,
 )
@@ -34,6 +36,14 @@ class WorkspaceProfileService:
             configuration = dict(workspace.configuration)
             configuration["organization"] = payload.organization.model_dump(mode="json")
             workspace.configuration = configuration
+        if payload.qualification is not None:
+            configuration = dict(workspace.configuration)
+            configuration["qualification"] = payload.qualification.model_dump(mode="json")
+            workspace.configuration = configuration
+        if payload.ai_guidance is not None:
+            configuration = dict(workspace.configuration)
+            configuration["ai_guidance"] = payload.ai_guidance.model_dump(mode="json")
+            workspace.configuration = configuration
 
         record_audit_event(
             self._db,
@@ -61,5 +71,11 @@ class WorkspaceProfileService:
             timezone=workspace.timezone,
             organization=OrganizationConfiguration.model_validate(
                 configuration.get("organization", {})
+            ),
+            qualification=QualificationConfiguration.model_validate(
+                configuration.get("qualification", {})
+            ),
+            ai_guidance=AiGuidanceConfiguration.model_validate(
+                configuration.get("ai_guidance", {})
             ),
         )

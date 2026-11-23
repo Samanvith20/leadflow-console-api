@@ -3,8 +3,8 @@ from app.schemas.source import SourceCreate
 from app.services.source_identifiers import create_source_public_id
 
 
-def test_source_create_uses_empty_configuration_by_default() -> None:
-    source = SourceCreate(name="Website Form", source_type=SourceType.WEBSITE_FORM)
+def test_manual_source_can_use_empty_configuration_by_default() -> None:
+    source = SourceCreate(name="Manual entry", source_type=SourceType.MANUAL_ENTRY)
 
     assert source.configuration.field_definitions == []
 

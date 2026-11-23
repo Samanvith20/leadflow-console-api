@@ -16,5 +16,7 @@ class AuditEventRead(BaseModel):
     action: str = Field(min_length=1, max_length=100)
     entity_type: str = Field(min_length=1, max_length=50)
     entity_id: UUID
-    metadata: dict[str, Any] = Field(validation_alias="metadata_json", serialization_alias="metadata")
+    metadata: dict[str, Any] = Field(
+        validation_alias="metadata_json", serialization_alias="metadata"
+    )
     occurred_at: datetime

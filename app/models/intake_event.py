@@ -33,7 +33,9 @@ class IntakeEvent(Base):
     __tablename__ = "intake_events"
     __table_args__ = (
         CheckConstraint("source_event_id <> ''", name="ck_intake_events_source_event_id_not_blank"),
-        CheckConstraint("char_length(payload_hash) = 64", name="ck_intake_events_payload_hash_length"),
+        CheckConstraint(
+            "char_length(payload_hash) = 64", name="ck_intake_events_payload_hash_length"
+        ),
         UniqueConstraint("source_id", "source_event_id", name="uq_intake_events_source_event"),
     )
 

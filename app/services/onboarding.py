@@ -10,9 +10,12 @@ from app.schemas.onboarding import (
     OnboardingCompleteResponse,
     OnboardingRead,
     OnboardingUpdate,
+)
+from app.schemas.workspace import (
+    AiGuidanceConfiguration,
+    OrganizationConfiguration,
     QualificationConfiguration,
 )
-from app.schemas.workspace import AiGuidanceConfiguration, OrganizationConfiguration
 from app.services.audit import record_audit_event
 
 
@@ -66,14 +69,30 @@ class OnboardingService:
             raise OnboardingIncompleteError("Describe your ideal lead before completing setup")
         if not state.ai_guidance.brand_tone or not state.ai_guidance.reply_goal:
             raise OnboardingIncompleteError("Choose a reply tone and goal before completing setup")
-        if not self._db.scalar(select(Source.id).where(Source.workspace_id == workspace.id, Source.status == SourceStatus.ACTIVE)):
-            raise OnboardingIncompleteError("Add at least one active source before completing setup")
+        if not self._db.scalar(
+            select(Source.id).where(
+                Source.workspace_id == workspace.id, Source.status == SourceStatus.ACTIVE
+            )
+        ):
+            raise OnboardingIncompleteError(
+                "Add at least one active source before completing setup"
+            )
         completed_at = datetime.now(UTC)
         workspace.onboarding_completed_at = completed_at
         configuration = dict(workspace.configuration)
-        configuration["onboarding"] = {**dict(configuration.get("onboarding", {})), "current_step": "connect_source"}
+        configuration["onboarding"] = {
+            **dict(configuration.get("onboarding", {})),
+            "current_step": "connect_source",
+        }
         workspace.configuration = configuration
-        record_audit_event(self._db, workspace_id=workspace.id, actor_user_id=user.id, action="onboarding.completed", entity_type="workspace", entity_id=workspace.id)
+        record_audit_event(
+            self._db,
+            workspace_id=workspace.id,
+            actor_user_id=user.id,
+            action="onboarding.completed",
+            entity_type="workspace",
+            entity_id=workspace.id,
+        )
         self._db.commit()
         return OnboardingCompleteResponse(completed_at=completed_at)
 
@@ -88,9 +107,17 @@ class OnboardingService:
         onboarding = configuration.get("onboarding", {})
         step = onboarding.get("current_step", "business_profile")
         return OnboardingRead(
-            current_step=step if step in {"business_profile", "qualification", "ai_guidance", "connect_source"} else "business_profile",
+            current_step=step
+            if step in {"business_profile", "qualification", "ai_guidance", "connect_source"}
+            else "business_profile",
             completed_at=workspace.onboarding_completed_at,
-            organization=OrganizationConfiguration.model_validate(configuration.get("organization", {})),
-            qualification=QualificationConfiguration.model_validate(configuration.get("qualification", {})),
-            ai_guidance=AiGuidanceConfiguration.model_validate(configuration.get("ai_guidance", {})),
+            organization=OrganizationConfiguration.model_validate(
+                configuration.get("organization", {})
+            ),
+            qualification=QualificationConfiguration.model_validate(
+                configuration.get("qualification", {})
+            ),
+            ai_guidance=AiGuidanceConfiguration.model_validate(
+                configuration.get("ai_guidance", {})
+            ),
         )

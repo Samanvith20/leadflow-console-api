@@ -51,7 +51,7 @@ def test_enum_input_is_case_insensitive(enum_class, uppercase_input, expected) -
                 "whatsapp",
             ],
         ),
-        (Source.__table__.c.status, ["active", "paused"]),
+        (Source.__table__.c.status, ["active", "paused", "archived"]),
         (AuthToken.__table__.c.purpose, ["password_reset", "email_verification"]),
         (ReplyDraft.__table__.c.status, ["draft", "approved", "discarded"]),
         (

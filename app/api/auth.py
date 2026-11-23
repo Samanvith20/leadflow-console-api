@@ -48,7 +48,9 @@ def _clear_session_cookie(response: Response) -> None:
     response.delete_cookie(key=get_settings().session_cookie_name, path="/")
 
 
-@router.post("/register", response_model=AuthenticatedUserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=AuthenticatedUserResponse, status_code=status.HTTP_201_CREATED
+)
 def register(
     payload: RegisterRequest, response: Response, service: AuthServiceDependency
 ) -> AuthenticatedUserResponse:
@@ -56,7 +58,9 @@ def register(
     try:
         user, workspace, created_session, verification_token = service.register(payload)
     except DuplicateEmailError as error:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email is already registered") from error
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Email is already registered"
+        ) from error
     EmailDeliveryService(get_settings()).send_email_verification(user.email, verification_token)
     _set_session_cookie(response, created_session.raw_token)
     return AuthenticatedUserResponse(user=user, workspace=workspace)
@@ -68,9 +72,13 @@ def login(
 ) -> AuthenticatedUserResponse:
     """Validate credentials and issue a new browser session without exposing a token in JSON."""
     try:
-        user, workspace, created_session = service.login(email=payload.email, password=payload.password)
+        user, workspace, created_session = service.login(
+            email=payload.email, password=payload.password
+        )
     except InvalidCredentialsError as error:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password") from error
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+        ) from error
     _set_session_cookie(response, created_session.raw_token)
     return AuthenticatedUserResponse(user=user, workspace=workspace)
 
@@ -91,8 +99,12 @@ def me(authentication: CurrentAuthentication) -> AuthenticatedUserResponse:
     return AuthenticatedUserResponse(user=authentication.user, workspace=authentication.workspace)
 
 
-@router.post("/forgot-password", response_model=MessageResponse, status_code=status.HTTP_202_ACCEPTED)
-def forgot_password(payload: PasswordResetRequest, service: AuthServiceDependency) -> MessageResponse:
+@router.post(
+    "/forgot-password", response_model=MessageResponse, status_code=status.HTTP_202_ACCEPTED
+)
+def forgot_password(
+    payload: PasswordResetRequest, service: AuthServiceDependency
+) -> MessageResponse:
     """Request a reset link while returning the same message for known and unknown emails."""
     result = service.request_password_reset(payload.email)
     if result is not None:
@@ -102,31 +114,47 @@ def forgot_password(payload: PasswordResetRequest, service: AuthServiceDependenc
 
 
 @router.post("/reset-password", response_model=MessageResponse)
-def reset_password(payload: ResetPasswordRequest, service: AuthServiceDependency) -> MessageResponse:
+def reset_password(
+    payload: ResetPasswordRequest, service: AuthServiceDependency
+) -> MessageResponse:
     """Use one reset link once, revoke old browser sessions, and require a fresh login."""
     try:
         service.reset_password(raw_token=payload.token, new_password=payload.new_password)
     except InvalidSecurityTokenError as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token") from error
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
+        ) from error
     return MessageResponse(message="Password reset successful. Please sign in.")
 
 
 @router.post("/verify-email", response_model=EmailVerificationResponse)
-def verify_email(payload: VerifyEmailRequest, service: AuthServiceDependency) -> EmailVerificationResponse:
+def verify_email(
+    payload: VerifyEmailRequest, service: AuthServiceDependency
+) -> EmailVerificationResponse:
     """Verify an email address using its one-use token from the verification link."""
     try:
         verified_at = service.verify_email(payload.token)
     except InvalidSecurityTokenError as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token") from error
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
+        ) from error
     return EmailVerificationResponse(email_verified_at=verified_at)
 
 
-@router.post("/resend-email-verification", response_model=MessageResponse, status_code=status.HTTP_202_ACCEPTED)
-def resend_email_verification(authentication: CurrentAuthentication, service: AuthServiceDependency) -> MessageResponse:
+@router.post(
+    "/resend-email-verification",
+    response_model=MessageResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def resend_email_verification(
+    authentication: CurrentAuthentication, service: AuthServiceDependency
+) -> MessageResponse:
     """Issue a replacement verification link without exposing a raw token in JSON."""
     raw_token = service.request_email_verification(authentication.user)
     if raw_token:
-        EmailDeliveryService(get_settings()).send_email_verification(authentication.user.email, raw_token)
+        EmailDeliveryService(get_settings()).send_email_verification(
+            authentication.user.email, raw_token
+        )
     return MessageResponse(message="If verification is still needed, a new link has been sent.")
 
 
@@ -146,6 +174,8 @@ def change_password(
             new_password=payload.new_password,
         )
     except InvalidCredentialsError as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect") from error
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect"
+        ) from error
     _set_session_cookie(response, created_session.raw_token)
     return MessageResponse(message="Password changed")

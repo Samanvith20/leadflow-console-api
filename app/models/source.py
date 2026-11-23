@@ -23,6 +23,7 @@ class SourceType(LowercaseEnum):
 class SourceStatus(LowercaseEnum):
     ACTIVE = "active"
     PAUSED = "paused"
+    ARCHIVED = "archived"
 
 
 class Source(Base):

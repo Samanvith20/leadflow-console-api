@@ -31,10 +31,14 @@ def get_current_authentication(
     try:
         return service.get_authenticated_session(session_token)
     except InactiveAccountError as error:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is unavailable") from error
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Account is unavailable"
+        ) from error
     except InvalidCredentialsError as error:
         # Never reveal whether a cookie value maps to a real session.
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated") from error
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+        ) from error
 
 
 CurrentAuthentication = Annotated[AuthenticatedSession, Depends(get_current_authentication)]

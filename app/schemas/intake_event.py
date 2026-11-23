@@ -12,6 +12,7 @@ class IntakeEventReceipt(BaseModel):
 
     receipt_id: UUID
     status: IntakeEventStatus
+    already_received: bool = False
 
 
 class IntakeEventRead(BaseModel):

@@ -57,7 +57,9 @@ class User(Base):
     max_open_leads: Mapped[int] = mapped_column(
         Integer, nullable=False, default=10, server_default=text("10")
     )
-    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

@@ -53,6 +53,16 @@ class AiGuidanceConfiguration(BaseModel):
     escalate_when: list[str] = Field(default_factory=list)
 
 
+class QualificationConfiguration(BaseModel):
+    """Business-owned criteria that determine whether an enquiry deserves attention."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ideal_lead_description: str | None = Field(default=None, min_length=30, max_length=2_000)
+    must_have: list[str] = Field(default_factory=list, max_length=20)
+    disqualifiers: list[str] = Field(default_factory=list, max_length=20)
+
+
 class OperationalConfiguration(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -94,6 +104,8 @@ class WorkspaceProfileRead(BaseModel):
     name: str
     timezone: str
     organization: OrganizationConfiguration
+    qualification: QualificationConfiguration
+    ai_guidance: AiGuidanceConfiguration
 
 
 class WorkspaceProfileUpdate(BaseModel):
@@ -104,6 +116,8 @@ class WorkspaceProfileUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=150)
     timezone: str | None = Field(default=None, min_length=1, max_length=64)
     organization: OrganizationConfiguration | None = None
+    qualification: QualificationConfiguration | None = None
+    ai_guidance: AiGuidanceConfiguration | None = None
 
     @model_validator(mode="after")
     def require_a_change(self) -> "WorkspaceProfileUpdate":

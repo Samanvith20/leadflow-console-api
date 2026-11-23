@@ -17,7 +17,9 @@ class Contact(Base):
             "full_name IS NOT NULL OR email IS NOT NULL OR phone_e164 IS NOT NULL",
             name="ck_contacts_has_identity",
         ),
-        CheckConstraint("email IS NULL OR email = lower(email)", name="ck_contacts_email_lowercase"),
+        CheckConstraint(
+            "email IS NULL OR email = lower(email)", name="ck_contacts_email_lowercase"
+        ),
         CheckConstraint(
             "phone_e164 IS NULL OR phone_e164 ~ '^\\+[1-9][0-9]{6,14}$'",
             name="ck_contacts_phone_e164",

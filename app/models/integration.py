@@ -49,7 +49,8 @@ class Integration(Base):
         index=True,
     )
     provider: Mapped[IntegrationProvider] = mapped_column(
-        Enum(IntegrationProvider, name="integration_provider", values_callable=enum_values), nullable=False
+        Enum(IntegrationProvider, name="integration_provider", values_callable=enum_values),
+        nullable=False,
     )
     external_account_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
     credentials_ciphertext: Mapped[str] = mapped_column(Text, nullable=False)

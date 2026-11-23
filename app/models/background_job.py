@@ -43,7 +43,9 @@ class BackgroundJob(Base):
     __table_args__ = (
         CheckConstraint("attempts >= 0", name="ck_background_jobs_attempts_nonnegative"),
         CheckConstraint("max_attempts > 0", name="ck_background_jobs_max_attempts_positive"),
-        CheckConstraint("attempts <= max_attempts", name="ck_background_jobs_attempts_within_limit"),
+        CheckConstraint(
+            "attempts <= max_attempts", name="ck_background_jobs_attempts_within_limit"
+        ),
         CheckConstraint(
             "(job_type = 'process_intake' AND intake_event_id IS NOT NULL AND lead_id IS NULL) "
             "OR (job_type <> 'process_intake' AND lead_id IS NOT NULL)",

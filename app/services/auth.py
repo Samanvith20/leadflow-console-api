@@ -289,7 +289,9 @@ class AuthService:
             raise InvalidSecurityTokenError
         return token
 
-    def _invalidate_other_security_tokens(self, user_id: uuid.UUID, purpose: AuthTokenPurpose) -> None:
+    def _invalidate_other_security_tokens(
+        self, user_id: uuid.UUID, purpose: AuthTokenPurpose
+    ) -> None:
         self._db.execute(
             update(AuthToken)
             .where(

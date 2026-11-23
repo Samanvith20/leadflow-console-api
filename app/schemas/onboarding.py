@@ -1,21 +1,15 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator
 
-from app.schemas.workspace import AiGuidanceConfiguration, OrganizationConfiguration
+from app.schemas.workspace import (
+    AiGuidanceConfiguration,
+    OrganizationConfiguration,
+    QualificationConfiguration,
+)
 
 OnboardingStep = Literal["business_profile", "qualification", "ai_guidance", "connect_source"]
-
-
-class QualificationConfiguration(BaseModel):
-    """Business-owned rules that help Leadflow decide whether an enquiry is worth pursuing."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    ideal_lead_description: str | None = Field(default=None, min_length=30, max_length=2_000)
-    must_have: list[str] = Field(default_factory=list, max_length=20)
-    disqualifiers: list[str] = Field(default_factory=list, max_length=20)
 
 
 class OnboardingUpdate(BaseModel):

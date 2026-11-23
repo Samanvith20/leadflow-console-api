@@ -31,10 +31,13 @@ class AuthToken(Base):
         index=True,
     )
     purpose: Mapped[AuthTokenPurpose] = mapped_column(
-        Enum(AuthTokenPurpose, name="auth_token_purpose", values_callable=enum_values), nullable=False
+        Enum(AuthTokenPurpose, name="auth_token_purpose", values_callable=enum_values),
+        nullable=False,
     )
     token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
     consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     invalidated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
