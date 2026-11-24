@@ -1,9 +1,7 @@
 from datetime import UTC, datetime
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.source import Source, SourceStatus
 from app.models.user import User, UserRole
 from app.models.workspace import Workspace
 from app.schemas.onboarding import (
@@ -69,20 +67,12 @@ class OnboardingService:
             raise OnboardingIncompleteError("Describe your ideal lead before completing setup")
         if not state.ai_guidance.brand_tone or not state.ai_guidance.reply_goal:
             raise OnboardingIncompleteError("Choose a reply tone and goal before completing setup")
-        if not self._db.scalar(
-            select(Source.id).where(
-                Source.workspace_id == workspace.id, Source.status == SourceStatus.ACTIVE
-            )
-        ):
-            raise OnboardingIncompleteError(
-                "Add at least one active source before completing setup"
-            )
         completed_at = datetime.now(UTC)
         workspace.onboarding_completed_at = completed_at
         configuration = dict(workspace.configuration)
         configuration["onboarding"] = {
             **dict(configuration.get("onboarding", {})),
-            "current_step": "connect_source",
+            "current_step": "ai_guidance",
         }
         workspace.configuration = configuration
         record_audit_event(
@@ -106,9 +96,12 @@ class OnboardingService:
         configuration = workspace.configuration or {}
         onboarding = configuration.get("onboarding", {})
         step = onboarding.get("current_step", "business_profile")
+        # Workspaces saved on the removed source step resume at the new final step.
+        if step == "connect_source":
+            step = "ai_guidance"
         return OnboardingRead(
             current_step=step
-            if step in {"business_profile", "qualification", "ai_guidance", "connect_source"}
+            if step in {"business_profile", "qualification", "ai_guidance"}
             else "business_profile",
             completed_at=workspace.onboarding_completed_at,
             organization=OrganizationConfiguration.model_validate(

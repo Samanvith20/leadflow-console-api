@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.dashboard import router as dashboard_router
+from app.api.leads import router as leads_router
 from app.api.onboarding import router as onboarding_router
 from app.api.sources import router as sources_router
+from app.api.team import router as team_router
 from app.api.webhooks import router as webhooks_router
 from app.api.workspace import router as workspace_router
 from app.core.config import get_settings
@@ -22,8 +25,11 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
 )
 app.include_router(auth_router)
+app.include_router(dashboard_router)
+app.include_router(leads_router)
 app.include_router(onboarding_router)
 app.include_router(sources_router)
+app.include_router(team_router)
 app.include_router(webhooks_router)
 app.include_router(workspace_router)
 

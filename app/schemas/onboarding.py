@@ -9,7 +9,7 @@ from app.schemas.workspace import (
     QualificationConfiguration,
 )
 
-OnboardingStep = Literal["business_profile", "qualification", "ai_guidance", "connect_source"]
+OnboardingStep = Literal["business_profile", "qualification", "ai_guidance"]
 
 
 class OnboardingUpdate(BaseModel):

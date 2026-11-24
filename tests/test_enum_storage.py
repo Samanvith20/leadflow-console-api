@@ -52,7 +52,10 @@ def test_enum_input_is_case_insensitive(enum_class, uppercase_input, expected) -
             ],
         ),
         (Source.__table__.c.status, ["active", "paused", "archived"]),
-        (AuthToken.__table__.c.purpose, ["password_reset", "email_verification"]),
+        (
+            AuthToken.__table__.c.purpose,
+            ["password_reset", "email_verification", "team_invitation"],
+        ),
         (ReplyDraft.__table__.c.status, ["draft", "approved", "discarded"]),
         (
             BackgroundJob.__table__.c.job_type,

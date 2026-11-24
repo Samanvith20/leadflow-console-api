@@ -12,6 +12,7 @@ from app.models.enums import LowercaseEnum, enum_values
 class AuthTokenPurpose(LowercaseEnum):
     PASSWORD_RESET = "password_reset"
     EMAIL_VERIFICATION = "email_verification"
+    TEAM_INVITATION = "team_invitation"
 
 
 class AuthToken(Base):

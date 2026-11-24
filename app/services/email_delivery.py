@@ -36,6 +36,17 @@ class EmailDeliveryService:
             description="Use this link within 24 hours to verify your Leadflow account.",
         )
 
+    def send_team_invitation(self, recipient: str, raw_token: str) -> None:
+        """Send a one-use invitation so a teammate can choose their own Leadflow password."""
+        self._send_security_link(
+            recipient=recipient,
+            path="/accept-invite",
+            raw_token=raw_token,
+            subject="You are invited to Leadflow",
+            heading="Join your Leadflow workspace",
+            description="Use this link within 10 minutes to choose your password and activate your account.",
+        )
+
     def _send_security_link(
         self,
         *,

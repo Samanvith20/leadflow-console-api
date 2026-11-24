@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     session_cookie_secure: bool = False
     password_reset_lifetime_minutes: int = 30
     email_verification_lifetime_hours: int = 24
+    team_invitation_lifetime_minutes: int = 10
     frontend_base_url: str = "http://localhost:3000"
     resend_api_key: str | None = None
     email_from: str | None = None

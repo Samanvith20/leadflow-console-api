@@ -14,6 +14,7 @@ from app.models.intake_event import IntakeEvent, IntakeEventStatus
 from app.models.lead import Lead
 from app.models.source import Source, SourceStatus
 from app.models.workspace import Workspace
+from app.services.audit import record_audit_event
 from app.services.encryption import EncryptionService
 from app.services.intake_integrity import hash_raw_payload
 
@@ -137,14 +138,26 @@ class WebhookService:
                 )
                 self.db.add(contact)
                 self.db.flush()
-        self.db.add(
-            Lead(
-                workspace_id=source.workspace_id,
-                contact_id=contact.id if contact else None,
-                intake_event_id=event.id,
-                enquiry_message=mapped.get("lead.enquiry_message"),
-                custom_fields=mapped["custom_fields"],
-            )
+        lead = Lead(
+            workspace_id=source.workspace_id,
+            contact_id=contact.id if contact else None,
+            intake_event_id=event.id,
+            enquiry_message=mapped.get("lead.enquiry_message"),
+            custom_fields=mapped["custom_fields"],
+        )
+        self.db.add(lead)
+        self.db.flush()
+        record_audit_event(
+            self.db,
+            workspace_id=source.workspace_id,
+            action="lead.received",
+            entity_type="lead",
+            entity_id=lead.id,
+            metadata={
+                "source_id": str(source.id),
+                "source_name": source.name,
+                "contact_name": contact.full_name if contact else None,
+            },
         )
         try:
             self.db.commit()
